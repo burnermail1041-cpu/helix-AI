@@ -1,11 +1,12 @@
 {
-  "name": "Helix AI",
-  "short_name": "Helix",
-  "description": "Sophisticated AI Companion",
+  "name": "Helix AI Companion",
+  "short_name": "Helix AI",
+  "description": "A sophisticated AI companion with a fluid, immersive interface and voice dictation.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#030712",
   "theme_color": "#8B5CF6",
+  "categories": ["productivity", "utilities", "education"],
   "icons": [
     {
       "src": "https://picsum.photos/192/192",
@@ -18,6 +19,22 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "https://picsum.photos/1080/1920?random=1",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Helix AI Chat Interface"
+    },
+    {
+      "src": "https://picsum.photos/1920/1080?random=2",
+      "sizes": "1920x1080",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Helix AI Desktop View"
     }
   ]
 }

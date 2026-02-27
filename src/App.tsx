@@ -28,7 +28,8 @@ import {
   Paperclip,
   Copy,
   Check,
-  Terminal
+  Terminal,
+  Mic
 } from 'lucide-react';
 import Markdown from 'react-markdown';
 import { Message, sendMessageStream } from './services/geminiService';
@@ -59,6 +60,8 @@ export default function App() {
     twoFactor: false
   });
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [isListening, setIsListening] = useState(false);
+  const recognitionRef = useRef<any>(null);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -71,6 +74,50 @@ export default function App() {
     scrollToBottom();
   }, [messages]);
 
+  useEffect(() => {
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      recognitionRef.current = new SpeechRecognition();
+      recognitionRef.current.continuous = false; // Set to false for dictation style
+      recognitionRef.current.interimResults = true;
+
+      recognitionRef.current.onresult = (event: any) => {
+        const transcript = Array.from(event.results)
+          .map((result: any) => result[0])
+          .map((result: any) => result.transcript)
+          .join('');
+        setInput(transcript);
+      };
+
+      recognitionRef.current.onend = () => {
+        setIsListening(false);
+      };
+
+      recognitionRef.current.onerror = (event: any) => {
+        console.error('Speech recognition error:', event.error);
+        setIsListening(false);
+      };
+    }
+  }, []);
+
+  const toggleListening = () => {
+    if (!recognitionRef.current) {
+      alert('Speech recognition is not supported in this browser.');
+      return;
+    }
+
+    if (isListening) {
+      recognitionRef.current.stop();
+    } else {
+      try {
+        recognitionRef.current.start();
+        setIsListening(true);
+      } catch (err) {
+        console.error('Failed to start recognition:', err);
+      }
+    }
+  };
+
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setAuthError('');
@@ -82,6 +129,11 @@ export default function App() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(authForm),
       });
+      
+      if (!res.ok) {
+        throw new Error(`Server returned ${res.status}`);
+      }
+
       const data = await res.json();
       if (data.success) {
         setUser(data.user);
@@ -815,6 +867,14 @@ export default function App() {
                     title="Attach Screenshot"
                   >
                     <ImageIcon className="w-4 h-4 md:w-5 md:h-5" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={toggleListening}
+                    className={`p-2 transition-colors ${isListening ? 'text-red-500 animate-pulse' : 'text-slate-500 hover:text-helix-primary'}`}
+                    title={isListening ? "Stop Listening" : "Voice Dictation"}
+                  >
+                    <Mic className="w-4 h-4 md:w-5 md:h-5" />
                   </button>
                 </div>
                 <input
